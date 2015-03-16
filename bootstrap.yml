@@ -1,0 +1,9 @@
+- name: Start Instances
+  hosts: localhost
+  roles:
+    - instances
+
+- name: Start swarm manager on instances
+  hosts: ec2nodes
+  roles:
+    - swarm

@@ -1,0 +1,34 @@
+- name: Copy file descriptor to nodes
+  copy: src=/playbook/ips dest=/tmp/ips owner=ec2-user group=ec2-user mode=0644
+
+- name: Copy docker config
+  copy: src=/playbook/docker dest=/etc/sysconfig/docker owner=root group=root mode=644
+  sudo: yes
+
+- name: Copy keys
+  copy: src=/playbook/keys dest=/etc/docker owner=root group=root mode=644
+  sudo: yes
+
+- name: Rename proper server keys
+  shell: sudo cp $(find /etc/docker/keys -name server-key*$(curl -s -m 5 http://169.254.169.254/latest/meta-data/local-ipv4).pem) /etc/docker/keys/server-key.pem
+  sudo: yes
+
+- name: Rename proper server certs
+  shell: sudo cp $(find /etc/docker/keys -name server-cert*$(curl -s -m 5 http://169.254.169.254/latest/meta-data/local-ipv4).pem) /etc/docker/keys/server.pem
+  sudo: yes
+
+- name: Delete Docker key.json file so new IDs are generated
+  shell: rm /etc/docker/key.json
+  sudo: yes
+
+- name: Restart docker service
+  service: name=docker state=restarted
+  sudo: yes
+
+- name: Pull swarm image
+  shell: docker pull swarm
+  sudo: yes
+
+- name: Start Swarm managers with file descriptors
+  shell: docker run -d -p 3376:3376 -v /tmp/ips:/tmp/ips -v /etc/docker/keys:/certs swarm --debug manage -H tcp://0.0.0.0:3376  --tlsverify --tlscacert=/certs/ca.pem --tlscert=/certs/server.pem --tlskey=/certs/server-key.pem file:///tmp/ips
+  sudo: yes
