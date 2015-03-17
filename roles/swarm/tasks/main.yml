@@ -30,5 +30,5 @@
   sudo: yes
 
 - name: Start Swarm managers with file descriptors
-  shell: docker run -d -p 3376:3376 -v /tmp/ips:/tmp/ips -v /etc/docker/keys:/certs swarm --debug manage -H tcp://0.0.0.0:3376  --tlsverify --tlscacert=/certs/ca.pem --tlscert=/certs/server.pem --tlskey=/certs/server-key.pem file:///tmp/ips
+  shell: docker run -d -p 4376:3376 -v /tmp/ips:/tmp/ips -v /etc/docker/keys:/certs swarm --debug manage -H tcp://0.0.0.0:3376  --tlsverify --tlscacert=/certs/ca.pem --tlscert=/certs/server.pem --tlskey=/certs/server-key.pem file:///tmp/ips
   sudo: yes
